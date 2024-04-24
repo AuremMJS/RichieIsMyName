@@ -8,6 +8,8 @@ public class MenuUI : MonoBehaviour
 {
     [SerializeField]
     private Button playButton;
+    [SerializeField]
+    private Slider difficultSlider;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +25,7 @@ public class MenuUI : MonoBehaviour
 
     void OnPlayButtonClicked()
     {
-        PlayerPrefs.SetInt("Level", 1);
+        PlayerPrefs.SetInt("Level", (int) difficultSlider.value);
         PlayerPrefs.Save();
         SceneManager.LoadScene(1);
     }

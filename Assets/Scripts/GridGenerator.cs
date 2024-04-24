@@ -70,7 +70,7 @@ public class GridGenerator : MonoBehaviour
                 Symbol symbol = Symbol.None;
                 do
                 {
-                    symbol = (Symbol)UnityEngine.Random.Range(0, noOfSymbolsAvailable);
+                    symbol = (Symbol)UnityEngine.Random.Range(0, noOfSymbolsAvailable - 1);
                 } while (generatedSymbols.Contains(symbol));
                 generatedSymbols.Add(symbol);
                 cards[i].SetSymbolImage(symbolSpritesSO.GetSpriteForSymbol(symbol));
