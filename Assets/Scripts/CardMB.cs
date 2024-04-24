@@ -8,6 +8,7 @@ public class CardMB : MonoBehaviour
 
     private Animator animator;
     private Button button;
+    private int index;
 
     void Awake()
     {
@@ -31,7 +32,14 @@ public class CardMB : MonoBehaviour
     private void OnButtonClicked()
     {
         animator.SetTrigger("Flip");
+        GridGenerator.Instance.EvaluateOpenedCards(index);
     }
+
+    public void SetIndex(int index)
+    {
+        this.index = index;
+    }
+
 
     public void SetSymbolImage(Sprite sprite)
     {
@@ -44,5 +52,15 @@ public class CardMB : MonoBehaviour
     public Sprite GetSymbolImage()
     {
         return symbolImage.sprite;
+    }
+
+    public void CloseCard()
+    {
+        animator.SetTrigger("FlipClose");
+    }
+
+    public void DisableCard()
+    {
+        button.interactable = false;
     }
 }

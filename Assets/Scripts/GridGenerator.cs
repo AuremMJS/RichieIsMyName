@@ -16,8 +16,10 @@ public class GridGenerator : MonoBehaviour
     private CardMB[] cards;
     private Dictionary<int, int> cardPairs;
     private List<Symbol> generatedSymbols;
+    private int noOfSymbolsAvailable;
+    private int prevOpenedCard;
+
     public static GridGenerator Instance;
-    int noOfSymbolsAvailable;
     private void Awake()
     {
         if (Instance == null)
@@ -30,6 +32,7 @@ public class GridGenerator : MonoBehaviour
         cardPairs = new Dictionary<int, int>();
         generatedSymbols = new List<Symbol>();
         noOfSymbolsAvailable = Enum.GetValues(typeof(Symbol)).Length;
+        prevOpenedCard = -1;
     }
 
     // Start is called before the first frame update
@@ -57,6 +60,7 @@ public class GridGenerator : MonoBehaviour
             GameObject card = Instantiate(cardPrefab, transform);
             CardMB cardMB = card.GetComponent<CardMB>();
             cards[i] = cardMB;
+            cardMB.SetIndex(i);
             if (!cardPairs.ContainsKey(i))
             {
                 int random = -1;
@@ -79,6 +83,28 @@ public class GridGenerator : MonoBehaviour
             {
                 cards[i].SetSymbolImage(cards[cardPairs[i]].GetSymbolImage());
             }
+        }
+    }
+
+    public void EvaluateOpenedCards(int index)
+    {
+        if (prevOpenedCard == -1)
+        {
+            prevOpenedCard = index;
+        }
+        else
+        {
+            if (cardPairs[prevOpenedCard] != index)
+            {
+                cards[prevOpenedCard].CloseCard();
+                cards[index].CloseCard();
+            }
+            else
+            {
+                cards[prevOpenedCard].DisableCard();
+                cards[index].DisableCard();
+            }
+            prevOpenedCard = -1;
         }
     }
 }
