@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c0f292e48d31ef44a5be84d8c7dc94d, type: 3}
+  m_Name: SymbolSpritesSO
+  m_EditorClassIdentifier: 
+  symbolSprites:
+  - symbol: 0
+    sprite: {fileID: 21300000, guid: 9fcbbeb9f202dc8459ea7d43abeb30e6, type: 3}
+  - symbol: 1
+    sprite: {fileID: 21300000, guid: 333a3a2619e24f44eb6e77f1a16da4c6, type: 3}
+  - symbol: 2
+    sprite: {fileID: 21300000, guid: 56ece01300aee934d898d0188c3721dd, type: 3}
+  - symbol: 3
+    sprite: {fileID: 21300000, guid: 4b6e5f3055e20c1478dbc12dbc7a0142, type: 3}
+  - symbol: 4
+    sprite: {fileID: 21300000, guid: 304a61691fb949349bf2d96a8fa1b444, type: 3}
+  - symbol: 5
+    sprite: {fileID: 21300000, guid: dd20e991e7df705468d072e43f7a3e4c, type: 3}
+  - symbol: 6
+    sprite: {fileID: 21300000, guid: fbe7d649a29a0444681195cfc1541874, type: 3}
+  - symbol: 7
+    sprite: {fileID: 21300000, guid: d24aca4cdcafe8148a57ddd0226c4d08, type: 3}
+  - symbol: 8
+    sprite: {fileID: 21300000, guid: d95dcb33cf908084fb07df549e3957de, type: 3}
+  - symbol: 9
+    sprite: {fileID: 21300000, guid: 0fbbe6926d4cfff46948a2ab8d23fbf6, type: 3}
+  - symbol: 10
+    sprite: {fileID: 21300000, guid: 721b0ac8989a5b54d90697f1720c50e6, type: 3}
+  - symbol: 11
+    sprite: {fileID: 21300000, guid: b241ad1b61bc1b042bd0d4ee53ccc4e5, type: 3}
+  - symbol: 12
+    sprite: {fileID: 21300000, guid: 399823be88cdb42409e9494f5a6b43be, type: 3}
+  - symbol: 13
+    sprite: {fileID: 21300000, guid: 93af03291f363ef439da87016f64d836, type: 3}
+  - symbol: 14
+    sprite: {fileID: 21300000, guid: cca4439642f9b014592ca04298ecf559, type: 3}
+  - symbol: 15
+    sprite: {fileID: 21300000, guid: 8ffd3980f20a7cf499077c437acd2cb2, type: 3}
+  - symbol: 16
+    sprite: {fileID: 21300000, guid: ca5280c8ec326974696ce2547caf1ed1, type: 3}
+  - symbol: 17
+    sprite: {fileID: 21300000, guid: b93eadadf4ca8de43843e7e19c2eeb36, type: 3}
