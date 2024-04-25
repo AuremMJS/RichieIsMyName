@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GridGenerator : MonoBehaviour
@@ -10,6 +12,12 @@ public class GridGenerator : MonoBehaviour
     private GameObject cardPrefab;
     [SerializeField]
     private SymbolSpritesSO symbolSpritesSO;
+    [SerializeField]
+    private TextMeshProUGUI turnsText;
+    [SerializeField]
+    private TextMeshProUGUI scoreText;
+    [SerializeField]
+    private Button homeButton;
 
     private float height, width;
     private GridLayoutGroup grid;
@@ -36,6 +44,14 @@ public class GridGenerator : MonoBehaviour
         width = rectTransform.rect.width;
 
         noOfSymbolsAvailable = Enum.GetValues(typeof(Symbol)).Length;
+        homeButton.onClick.RemoveAllListeners();
+        homeButton.onClick.AddListener(OnHomeButtonClicked);
+    }
+
+    private void OnHomeButtonClicked()
+    {
+        SessionEnd();
+        SceneManager.LoadScene(0);
     }
 
     public void LoadGrid(LevelConfigurationSO level, bool isResumed = false)
@@ -84,6 +100,9 @@ public class GridGenerator : MonoBehaviour
             {
                 cards[openedCard].OpenCard();
             }
+
+            turnsText.text = GameData.Turns.ToString();
+            scoreText.text = GameData.Score.ToString();
         }
     }
 
@@ -96,6 +115,8 @@ public class GridGenerator : MonoBehaviour
         GameData.GeneratedSymbols = new List<int>();
         GameData.OpenedCards = new List<int>();
         GameData.PrevOpenedCard = -1;
+        GameData.Turns = 0;
+        GameData.Score = 0;
 
         for (int i = 0; i < rows * cols; i++)
         {
@@ -134,6 +155,8 @@ public class GridGenerator : MonoBehaviour
         }
         else
         {
+            GameData.Turns++;
+            turnsText.text = GameData.Turns.ToString();
             if (GameData.CardPairs[GameData.PrevOpenedCard] != index)
             {
                 cards[GameData.PrevOpenedCard].CloseCard();
@@ -145,11 +168,13 @@ public class GridGenerator : MonoBehaviour
                 cards[GameData.PrevOpenedCard].DisableCard();
                 cards[index].DisableCard();
                 AudioController.Instance.PlayAudio("Success");
+                GameData.Score++;
+                scoreText.text = GameData.Score.ToString();
                 GameData.OpenedCards.Add(index);
                 GameData.OpenedCards.Add(GameData.PrevOpenedCard);
-                if(GameData.OpenedCards.Count == cards.Count())
-                {   
-                    AudioController.Instance.PlayAudio("Victory",1.0f);
+                if (GameData.OpenedCards.Count == cards.Count())
+                {
+                    AudioController.Instance.PlayAudio("Victory", 1.0f);
                     SessionEnd();
                 }
             }

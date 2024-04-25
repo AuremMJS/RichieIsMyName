@@ -7,4 +7,6 @@ public class GameData
     public List<int> GeneratedSymbols;
     public List<int> OpenedCards;
     public int PrevOpenedCard;
+    public int Turns;
+    public int Score;
 }
