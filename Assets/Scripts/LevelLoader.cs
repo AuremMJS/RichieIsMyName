@@ -9,7 +9,7 @@ public class LevelLoader : MonoBehaviour
     void Start()
     {
         int level = PlayerPrefs.GetInt("Level") - 1;
-        GridGenerator.Instance.LoadGrid(levelsSO.levels[level], PlayerPrefs.GetInt("IsResumed") == 1);
+        GameController.Instance.LoadGrid(levelsSO.levels[level], PlayerPrefs.GetInt("IsResumed") == 1);
     }
 
     // Update is called once per frame

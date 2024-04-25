@@ -23,17 +23,11 @@ public class CardMB : MonoBehaviour
         button.onClick.AddListener(OnButtonClicked);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void OnButtonClicked()
     {
         animator.SetTrigger("Flip");
         AudioController.Instance.PlayAudio("FlipCard");
-        GridGenerator.Instance.EvaluateOpenedCards(index);
+        GameController.Instance.EvaluateOpenedCards(index);
     }
 
     public void SetIndex(int index)

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GridGenerator : MonoBehaviour
+public class GameController : MonoBehaviour
 {
     [SerializeField]
     private GameObject cardPrefab;
@@ -25,7 +25,7 @@ public class GridGenerator : MonoBehaviour
 
     private int noOfSymbolsAvailable;
 
-    public static GridGenerator Instance;
+    public static GameController Instance;
 
     public GameData GameData
     {
@@ -60,14 +60,30 @@ public class GridGenerator : MonoBehaviour
             GenerateGridData(level);
         int rows = level.Rows;
         int cols = level.Columns;
+        
+        InitGrid(rows, cols);
+        CreateCards(rows * cols);
+
+        if (isResumed)
+        {
+            ResumeGame();
+        }
+    }
+
+    private void InitGrid(int rows, int cols)
+    {
         int maxDim = rows > cols ? rows : cols;
         grid.cellSize = new Vector2(width / maxDim, height / maxDim);
         grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
         grid.constraintCount = rows;
-        cards = new CardMB[rows * cols];
 
+    }
+
+    private void CreateCards(int size)
+    {
+        cards = new CardMB[size];
         List<int> assignedSymbols = new List<int>();
-        for (int i = 0; i < rows * cols; i++)
+        for (int i = 0; i < size; i++)
         {
             GameObject card = Instantiate(cardPrefab, transform);
             CardMB cardMB = card.GetComponent<CardMB>();
@@ -88,62 +104,81 @@ public class GridGenerator : MonoBehaviour
                 cards[i].SetSymbolImage(sprite);
             }
         }
+    }
 
-        if (isResumed)
+    private void ResumeGame()
+    {
+        foreach (CardMB card in cards)
         {
-            foreach (CardMB card in cards)
-            {
-                card.CloseCardImmediate();
-            }
-
-            foreach (int openedCard in GameData.OpenedCards)
-            {
-                cards[openedCard].OpenCard();
-            }
-
-            turnsText.text = GameData.Turns.ToString();
-            scoreText.text = GameData.Score.ToString();
+            card.CloseCardImmediate();
         }
+
+        foreach (int openedCard in GameData.OpenedCards)
+        {
+            cards[openedCard].OpenCard();
+        }
+
+        turnsText.text = GameData.Turns.ToString();
+        scoreText.text = GameData.Score.ToString();
     }
 
     private void GenerateGridData(LevelConfigurationSO level)
     {
         int rows = level.Rows;
         int cols = level.Columns;
+        InitGameData(rows * cols);
+        InitCardPairs();
+        
+        for (int i = 0; i < rows * cols; i++)
+        {
+            if (GameData.CardPairs[i] == -1)
+            {
+                AssignRandomCardPair(i, rows * cols);
+                GenerateRandomSymbol();
+            }
+        }
+    }
+
+    private void InitGameData(int size)
+    {
         GameData.LevelIndex = PlayerPrefs.GetInt("Level");
-        GameData.CardPairs = new int[rows * cols];
+        GameData.CardPairs = new int[size];
         GameData.GeneratedSymbols = new List<int>();
         GameData.OpenedCards = new List<int>();
         GameData.PrevOpenedCard = -1;
         GameData.Turns = 0;
         GameData.Score = 0;
+    }
 
-        for (int i = 0; i < rows * cols; i++)
+    private void InitCardPairs()
+    {
+        for (int i = 0; i < GameData.CardPairs.Length; i++)
         {
             GameData.CardPairs[i] = -1;
         }
+    }
 
-        for (int i = 0; i < rows * cols; i++)
+    private void AssignRandomCardPair(int index, int size)
+    {
+        int random = -1;
+        do
         {
-            if (GameData.CardPairs[i] == -1)
-            {
-                int random = -1;
-                do
-                {
-                    random = UnityEngine.Random.Range(0, rows * cols);
+            random = UnityEngine.Random.Range(0, size);
 
-                } while (random == i || GameData.CardPairs[random] != -1);
-                GameData.CardPairs[i] = random;
-                GameData.CardPairs[random] = i;
+        } while (random == index || GameData.CardPairs[random] != -1);
+        GameData.CardPairs[index] = random;
+        GameData.CardPairs[random] = index;
 
-                Symbol symbol = Symbol.None;
-                do
-                {
-                    symbol = (Symbol)UnityEngine.Random.Range(0, noOfSymbolsAvailable - 1);
-                } while (GameData.GeneratedSymbols.Contains((int)symbol));
-                GameData.GeneratedSymbols.Add((int)symbol);
-            }
-        }
+    }
+
+    private void GenerateRandomSymbol()
+    {
+        Symbol symbol = Symbol.None;
+        do
+        {
+            symbol = (Symbol)UnityEngine.Random.Range(0, noOfSymbolsAvailable - 1);
+        } while (GameData.GeneratedSymbols.Contains((int)symbol));
+        GameData.GeneratedSymbols.Add((int)symbol);
     }
 
     public void EvaluateOpenedCards(int index)
@@ -159,26 +194,42 @@ public class GridGenerator : MonoBehaviour
             turnsText.text = GameData.Turns.ToString();
             if (GameData.CardPairs[GameData.PrevOpenedCard] != index)
             {
-                cards[GameData.PrevOpenedCard].CloseCard();
-                cards[index].CloseCard();
-                AudioController.Instance.PlayAudio("Mismatch");
+                CardMismatch(index);
             }
             else
             {
-                cards[GameData.PrevOpenedCard].DisableCard();
-                cards[index].DisableCard();
-                AudioController.Instance.PlayAudio("Success");
-                GameData.Score++;
-                scoreText.text = GameData.Score.ToString();
-                GameData.OpenedCards.Add(index);
-                GameData.OpenedCards.Add(GameData.PrevOpenedCard);
-                if (GameData.OpenedCards.Count == cards.Count())
-                {
-                    AudioController.Instance.PlayAudio("Victory", 1.0f);
-                    SessionEnd();
-                }
+                CardMatch(index);
+                CheckForWin();
             }
             GameData.PrevOpenedCard = -1;
+        }
+    }
+
+    private void CardMismatch(int index)
+    {
+        cards[GameData.PrevOpenedCard].CloseCard();
+        cards[index].CloseCard();
+        AudioController.Instance.PlayAudio("Mismatch");
+
+    }
+
+    private void CardMatch(int index)
+    {
+        cards[GameData.PrevOpenedCard].DisableCard();
+        cards[index].DisableCard();
+        AudioController.Instance.PlayAudio("Success");
+        GameData.Score++;
+        scoreText.text = GameData.Score.ToString();
+        GameData.OpenedCards.Add(index);
+        GameData.OpenedCards.Add(GameData.PrevOpenedCard);
+    }
+
+    private void CheckForWin()
+    {
+        if (GameData.OpenedCards.Count == cards.Count())
+        {
+            AudioController.Instance.PlayAudio("Victory", 1.0f);
+            SessionEnd();
         }
     }
 

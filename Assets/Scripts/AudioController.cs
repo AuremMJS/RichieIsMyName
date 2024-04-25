@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -30,12 +28,6 @@ public class AudioController : MonoBehaviour
         {
             audioSources.Add(audioInfo.Name, audioInfo.AudioSource);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     public void PlayAudio(string name, float delay = 0)
