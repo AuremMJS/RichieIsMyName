@@ -9,8 +9,4 @@ public class LevelConfigurationSO : ScriptableObject
 {
     public int Rows;
     public int Columns;
-
-    public void OnValidate()
-    {
-    }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -24,12 +22,6 @@ public class MenuUI : MonoBehaviour
             resumeButton.onClick.RemoveAllListeners();
             resumeButton.onClick.AddListener(OnResumeButtonClicked);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     void OnPlayButtonClicked()
