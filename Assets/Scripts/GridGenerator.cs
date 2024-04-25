@@ -138,15 +138,18 @@ public class GridGenerator : MonoBehaviour
             {
                 cards[GameData.PrevOpenedCard].CloseCard();
                 cards[index].CloseCard();
+                AudioController.Instance.PlayAudio("Mismatch");
             }
             else
             {
                 cards[GameData.PrevOpenedCard].DisableCard();
                 cards[index].DisableCard();
+                AudioController.Instance.PlayAudio("Success");
                 GameData.OpenedCards.Add(index);
                 GameData.OpenedCards.Add(GameData.PrevOpenedCard);
                 if(GameData.OpenedCards.Count == cards.Count())
-                {
+                {   
+                    AudioController.Instance.PlayAudio("Victory",1.0f);
                     SessionEnd();
                 }
             }

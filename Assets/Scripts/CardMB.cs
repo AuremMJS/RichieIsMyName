@@ -32,6 +32,7 @@ public class CardMB : MonoBehaviour
     private void OnButtonClicked()
     {
         animator.SetTrigger("Flip");
+        AudioController.Instance.PlayAudio("FlipCard");
         GridGenerator.Instance.EvaluateOpenedCards(index);
     }
 
