@@ -56,7 +56,20 @@ public class CardMB : MonoBehaviour
 
     public void CloseCard()
     {
+        button.interactable = true;
         animator.SetTrigger("FlipClose");
+    }
+
+    public void OpenCard()
+    {
+        button.interactable = false;
+        animator.Play("Flip");
+    }
+
+    public void CloseCardImmediate()
+    {
+        button.interactable = true;
+        animator.Play("FlipClose");
     }
 
     public void DisableCard()

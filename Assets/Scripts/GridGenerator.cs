@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,12 +14,18 @@ public class GridGenerator : MonoBehaviour
     private float height, width;
     private GridLayoutGroup grid;
     private CardMB[] cards;
-    private Dictionary<int, int> cardPairs;
-    private List<Symbol> generatedSymbols;
+
     private int noOfSymbolsAvailable;
-    private int prevOpenedCard;
 
     public static GridGenerator Instance;
+
+    public GameData GameData
+    {
+        get
+        {
+            return GameDataService.Instance.GameData;
+        }
+    }
     private void Awake()
     {
         if (Instance == null)
@@ -29,25 +35,13 @@ public class GridGenerator : MonoBehaviour
         height = rectTransform.rect.height;
         width = rectTransform.rect.width;
 
-        cardPairs = new Dictionary<int, int>();
-        generatedSymbols = new List<Symbol>();
         noOfSymbolsAvailable = Enum.GetValues(typeof(Symbol)).Length;
-        prevOpenedCard = -1;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void LoadGrid(LevelConfigurationSO level, bool isResumed = false)
     {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public void GenerateGrid(LevelConfigurationSO level)
-    {
+        if (!isResumed)
+            GenerateGridData(level);
         int rows = level.Rows;
         int cols = level.Columns;
         int maxDim = rows > cols ? rows : cols;
@@ -55,56 +49,125 @@ public class GridGenerator : MonoBehaviour
         grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
         grid.constraintCount = rows;
         cards = new CardMB[rows * cols];
+
+        List<int> assignedSymbols = new List<int>();
         for (int i = 0; i < rows * cols; i++)
         {
             GameObject card = Instantiate(cardPrefab, transform);
             CardMB cardMB = card.GetComponent<CardMB>();
             cards[i] = cardMB;
             cardMB.SetIndex(i);
-            if (!cardPairs.ContainsKey(i))
+            int cardPair = GameData.CardPairs[i];
+            if (!assignedSymbols.Contains(i) && !assignedSymbols.Contains(cardPair))
+            {
+                int symbolIndex = assignedSymbols.Count;
+                Symbol symbol = (Symbol)GameData.GeneratedSymbols[symbolIndex];
+                Sprite sprite = symbolSpritesSO.GetSpriteForSymbol(symbol);
+                cards[i].SetSymbolImage(sprite);
+                assignedSymbols.Add(i);
+            }
+            else
+            {
+                Sprite sprite = cards[cardPair].GetSymbolImage();
+                cards[i].SetSymbolImage(sprite);
+            }
+        }
+
+        if (isResumed)
+        {
+            foreach (CardMB card in cards)
+            {
+                card.CloseCardImmediate();
+            }
+
+            foreach (int openedCard in GameData.OpenedCards)
+            {
+                cards[openedCard].OpenCard();
+            }
+        }
+    }
+
+    private void GenerateGridData(LevelConfigurationSO level)
+    {
+        int rows = level.Rows;
+        int cols = level.Columns;
+        GameData.LevelIndex = PlayerPrefs.GetInt("Level");
+        GameData.CardPairs = new int[rows * cols];
+        GameData.GeneratedSymbols = new List<int>();
+        GameData.OpenedCards = new List<int>();
+        GameData.PrevOpenedCard = -1;
+
+        for (int i = 0; i < rows * cols; i++)
+        {
+            GameData.CardPairs[i] = -1;
+        }
+
+        for (int i = 0; i < rows * cols; i++)
+        {
+            if (GameData.CardPairs[i] == -1)
             {
                 int random = -1;
                 do
                 {
                     random = UnityEngine.Random.Range(0, rows * cols);
 
-                } while (random == i || cardPairs.ContainsKey(random));
-                cardPairs.Add(i, random);
-                cardPairs.Add(random, i);
+                } while (random == i || GameData.CardPairs[random] != -1);
+                GameData.CardPairs[i] = random;
+                GameData.CardPairs[random] = i;
+
                 Symbol symbol = Symbol.None;
                 do
                 {
                     symbol = (Symbol)UnityEngine.Random.Range(0, noOfSymbolsAvailable - 1);
-                } while (generatedSymbols.Contains(symbol));
-                generatedSymbols.Add(symbol);
-                cards[i].SetSymbolImage(symbolSpritesSO.GetSpriteForSymbol(symbol));
-            }
-            else
-            {
-                cards[i].SetSymbolImage(cards[cardPairs[i]].GetSymbolImage());
+                } while (GameData.GeneratedSymbols.Contains((int)symbol));
+                GameData.GeneratedSymbols.Add((int)symbol);
             }
         }
     }
 
     public void EvaluateOpenedCards(int index)
     {
-        if (prevOpenedCard == -1)
+        if (GameData.PrevOpenedCard == -1)
         {
-            prevOpenedCard = index;
+            GameData.PrevOpenedCard = index;
+            cards[index].DisableCard();
         }
         else
         {
-            if (cardPairs[prevOpenedCard] != index)
+            if (GameData.CardPairs[GameData.PrevOpenedCard] != index)
             {
-                cards[prevOpenedCard].CloseCard();
+                cards[GameData.PrevOpenedCard].CloseCard();
                 cards[index].CloseCard();
             }
             else
             {
-                cards[prevOpenedCard].DisableCard();
+                cards[GameData.PrevOpenedCard].DisableCard();
                 cards[index].DisableCard();
+                GameData.OpenedCards.Add(index);
+                GameData.OpenedCards.Add(GameData.PrevOpenedCard);
+                if(GameData.OpenedCards.Count == cards.Count())
+                {
+                    SessionEnd();
+                }
             }
-            prevOpenedCard = -1;
+            GameData.PrevOpenedCard = -1;
         }
+    }
+
+    private void SessionEnd()
+    {
+        if (GameData.OpenedCards.Count != cards.Length)
+        {
+            GameDataService.Instance.SaveGameData();
+        }
+        else
+        {
+            GameDataService.Instance.DeleteSavedGameData();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        SessionEnd();
     }
 }
