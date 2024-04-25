@@ -249,4 +249,12 @@ public class GameController : MonoBehaviour
     {
         SessionEnd();
     }
+
+    private void OnApplicationFocus(bool focus)
+    {
+        if(focus == false)
+        {
+            SessionEnd();
+        }
+    }
 }
